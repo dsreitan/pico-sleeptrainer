@@ -5,14 +5,13 @@ A digital clock application for Raspberry Pi Pico 2 W with Waveshare Pico-LCD-2 
 ## Features
 
 - Large, easy-to-read time display (HH:MM format)
-- WiFi time synchronization via NTP
-- Automatic timezone adjustment
+- Button-based time setting (no WiFi needed)
 - Color-coded display (pink 07:00-11:00, black otherwise)
 - Button support (pink background when any button pressed)
 
 ## Hardware Requirements
 
-- Raspberry Pi Pico 2 W
+- Raspberry Pi Pico 2 W (or regular Pico)
 - Waveshare Pico-LCD-2 display (240x320 ST7789 TFT LCD)
 
 ## Software Requirements
@@ -26,8 +25,7 @@ A digital clock application for Raspberry Pi Pico 2 W with Waveshare Pico-LCD-2 
 - `lcd_driver.py` - LCD display driver (ST7789)
 - `clock_font.py` - Font rendering utilities
 - `clock_buttons.py` - Button input handling
-- `ntp_time.py` - NTP time synchronization
-- `config.py` - WiFi and timezone configuration
+- `rtc_time.py` - RTC time functions
 
 ## Setup Instructions
 
@@ -35,10 +33,10 @@ A digital clock application for Raspberry Pi Pico 2 W with Waveshare Pico-LCD-2 
 
 1. Download the latest MicroPython firmware for Pico 2 W from [micropython.org](https://micropython.org/download/rp2-pico-w/)
 2. Hold the BOOTSEL button on your Pico 2 W
-3. Connect the Pico to your computer via USB
+3. Connect the Pico to your computer via USB (while holding BOOTSEL)
 4. Release the BOOTSEL button
-5. Copy the `.uf2` file to the Pico drive that appears
-6. The Pico will reboot with MicroPython installed
+5. Copy the `.uf2` file to the Pico drive that appears (named "RPI-RP2" or similar)
+6. The Pico will automatically reboot with MicroPython installed
 
 ### 2. Upload Project Files
 
@@ -47,27 +45,38 @@ Upload all project files to your Pico 2 W:
 - `lcd_driver.py`
 - `clock_font.py`
 - `clock_buttons.py`
-- `ntp_time.py`
-- `config.py`
+- `rtc_time.py`
 
-### 3. Configure WiFi
-
-Edit `config.py` and add your WiFi credentials:
-```python
-WIFI_SSID = "your_wifi_network"
-WIFI_PASSWORD = "your_wifi_password"
-TIMEZONE_OFFSET = -5  # Adjust for your timezone
-```
-
-### 4. Run the Clock
+### 3. Run the Clock
 
 Run `clock_main.py` on your Pico 2 W. The clock will:
 - Initialize the display
-- Connect to WiFi (if configured)
-- Sync time with NTP server
 - Display the current time (updates every second)
+- Allow time setting via buttons
 
 **Tip:** Rename `clock_main.py` to `main.py` to automatically run the clock when the Pico boots up.
+
+## Setting the Time
+
+### Using Buttons
+
+1. **Enter time setting mode:** Hold KEY0 (button 0) for 2 seconds
+2. **Adjust hour:**
+   - KEY1 (button 1): Increase hour
+   - KEY2 (button 2): Decrease hour
+   - KEY3 (button 3): Switch to minute editing (or cancel)
+3. **Adjust minute:**
+   - KEY1 (button 1): Increase minute
+   - KEY2 (button 2): Decrease minute
+   - KEY3 (button 3): Cancel
+4. **Save:** Press KEY0 (button 0) to confirm and save
+
+### Button Layout
+
+- **KEY0 (button 0):** Enter time setting (hold 2s) / Confirm
+- **KEY1 (button 1):** Increase value
+- **KEY2 (button 2):** Decrease value
+- **KEY3 (button 3):** Next field / Cancel
 
 ## Troubleshooting
 
@@ -75,16 +84,18 @@ Run `clock_main.py` on your Pico 2 W. The clock will:
 - Check all connections between Pico and LCD
 - Verify pin assignments in `lcd_driver.py` match your hardware
 
-**WiFi connection fails**
-- Verify WiFi credentials in `config.py`
-- Check that your WiFi network is 2.4 GHz (Pico 2 W doesn't support 5 GHz)
-- Ensure you're within range of the WiFi network
+**Time resets after power loss**
+- This is normal - the RTC needs power to maintain time
+- Set the time again after powering on using the button method above
 
-**Time not syncing**
-- Check WiFi connection status
-- Verify internet connectivity
-- Check timezone offset setting in `config.py`
-- If NTP fails, the clock will use the default RTC time
+**Buttons not working**
+- Check button connections
+- Verify pin assignments in `clock_buttons.py` match your hardware
+- Buttons are active LOW (pressed = 0)
+
+**Time setting mode not entering**
+- Make sure to hold KEY0 for a full 2 seconds
+- Release all buttons before trying again
 
 ## Resources
 
